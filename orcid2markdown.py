@@ -1,6 +1,6 @@
 import requests
 import bibtexparser
-from typing import List, Tuple, Dict, Union, Any
+from typing import List, Tuple, Dict, Union
 from collections import defaultdict
 from habanero import cn
 from dataclasses import dataclass
@@ -19,8 +19,8 @@ class ORCID2Markdown:
 * _Journal_: {journal}
 * _Date_: {year} / {month}
 * _Volume_: {volume}
-* https://doi.org/{doi}
----
+* [DOI](https://doi.org/{doi})
+
 """
 
     def _match_name(self, author: str) -> bool:
@@ -156,7 +156,7 @@ class ORCID2Markdown:
         # Returns -1 if failed
         return -1
 
-    def _get_bibentry_from_doi(self, doi: str) -> Any[int, str]:
+    def _get_bibentry_from_doi(self, doi: str) -> Union[int, str]:
         """
         Gets bibenty from DOI
         Returns:
@@ -180,10 +180,8 @@ class ORCID2Markdown:
         """
         # Get first and coauthor paper information
         first, co = self._auth_list
-        filedata = """> :warning: **Note**
-        >  Automatically Generated with ORCID2Markdown
-        # First Author Papers
-        """
+        filedata = "**Note:** Page automatically generated with ORCID2Markdown.\n{: .notice--warning}"
+        filedata += "\n# First Author \n ---"
         # Go thru first author first.
         for dic in first:
             _append = self.MARKDOWN_TEMPLATE.format(title=dic['title'].replace("\n", "").replace("\t", ""),
@@ -194,11 +192,10 @@ class ORCID2Markdown:
                                                     volume=dic['volume'],
                                                     doi=dic['doi'])
             filedata += _append
+            if dic != first[-1]:
+                filedata += "---"
 
-        filedata += """
-        # Coauthor papers
-        ---
-        """
+        filedata += "# Co-Author \n ---"
         for dic in co:
             _append = self.MARKDOWN_TEMPLATE.format(title=dic['title'].replace("\n", "").replace("\t", ""),
                                                     authors=dic['author'],
@@ -208,7 +205,7 @@ class ORCID2Markdown:
                                                     volume=dic['volume'],
                                                     doi=dic['doi'])
             filedata += _append
-
+            filedata += "---"
         # Save into file
         with open(filename, "w") as f:
             f.write(filedata)
