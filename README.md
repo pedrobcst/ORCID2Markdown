@@ -37,8 +37,7 @@ Therefore, LaTeX-styled text needs to be fixed _manually_.
 Installation
 =====
 ```bash
-git clone https://github.com/pedrobcst/ORCID2Markdown
-pip install habanero bibtexparser
+pip install orcid2markdown
 ```
 
 Usage
